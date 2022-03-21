@@ -1,0 +1,116 @@
+# https://help.github.com/en/articles/metadata-syntax-for-github-actions
+
+name: 'luminsports-php-cs-fixer'
+author: 'luminsports'
+description: 'Use PHP-CS-Fixer via Github Action.'
+inputs:
+  php-cs-fixer-version:
+    description: 'Which php-cs-fixer release to download.'
+    required: false
+    default: 'v3.7.0'
+  create-annotations:
+    description: 'Whether to create annotations based on checkstyle results.'
+    required: false
+    default: 'true'
+  annotation-name:
+    description: 'Name for the check run to create. Default: PHP-CS-Fixer.'
+    required: false
+    default: 'PHP-CS-Fixer'
+  annotation-title:
+    description: 'Title for the check run to create. Default: PHP-CS-Fixer Results.'
+    required: false
+    default: 'PHP-CS-Fixer Results'
+  create-pull-request:
+    description: 'Whether to create a pull request to fix php-cs-fixer issues.'
+    required: false
+    default: 'true'
+  commit-message:
+    description: 'The message to use when committing code style fixes.'
+    required: false
+    default: 'style(php-cs-fixer): Fix code-style'
+  pull-request-title:
+    description: 'The title of the pull request.'
+    required: false
+    default: 'Fix PHP code-style in ${{ github.ref }}'
+  pull-request-assignees:
+    description: 'A comma or newline separated list of assignees (GitHub usernames).'
+    required: false
+    default: ${{ github.actor }}
+  pull-request-reviewers:
+    description: 'A comma or newline separated list of reviewers (GitHub usernames) to request a review from.'
+    required: false
+    default: ''
+  pull-request-team-reviewers:
+    description: >
+      A comma or newline separated list of GitHub teams to request a review from.
+      Note that a `repo` scoped Personal Access Token (PAT) may be required.
+    required: false
+    default: ''
+  pull-request-branch:
+    description: 'The pull request branch name.'
+    required: false
+    default: 'php-cs-fixer/${{ github.ref }}'
+  pull-request-labels:
+    description: 'A comma or newline separated list of labels.'
+    required: false
+    default: 'php-cs-fixer'
+outputs:
+  checkstyle-result:
+    description: 'Checkstyle report generate by php-cs-fixer'
+    value: ${{ steps.php-cs-fixer.outputs.checkstyle-result }}
+  pull-request-number:
+    description: 'The pull request number'
+    value: ${{ steps.pull-request.outputs.pull-request-number }}
+  pull-request-url:
+    description: 'The URL of the pull request.'
+    value: ${{ steps.pull-request.outputs.pull-request-url }}
+  pull-request-operation:
+    description: 'The pull request operation performed by the action, `created`, `updated` or `closed`.'
+    value: ${{ steps.pull-request.outputs.pull-request-operation }}
+  pull-request-head-sha:
+    description: 'The commit SHA of the pull request branch.'
+    value: ${{ steps.pull-request.outputs.pull-request-head-sha }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup
+      shell: bash
+      run: |
+        curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/${{ inputs.php-cs-fixer-version }}/php-cs-fixer.phar -o php-cs-fixer
+        chmod a+x php-cs-fixer
+
+    - name: Run PHP CS Fixer
+      id: php-cs-fixer
+      shell: bash
+      run: |
+        ./php-cs-fixer fix --format=checkstyle > ./checkstyle-result.xml
+        echo "::set-output name=checkstyle-result::$(cat ./checkstyle-result.xml)"
+
+    - name: Annotate
+      if: inputs.create-annotations == 'true'
+      uses: jwgmeligmeyling/checkstyle-github-action@master
+      with:
+        name: ${{ inputs.annotation-name }}
+        title: ${{ inputs.annotation-title }}
+        path: './checkstyle-result.xml'
+
+    - name: Cleanup
+      shell: bash
+      run: rm -rf ./php-cs-fixer ./checkstyle-result.xml ./.php-cs-fixer.cache
+
+    - name: Create Pull Request
+      id: pull-request
+      if: inputs.create-pull-request == 'true'
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: ${{ inputs.commit-message }}
+        title: ${{ inputs.pull-request-title }}
+        delete-branch: true }}
+        assignees: ${{ inputs.pull-request-assignees }}
+        branch: ${{ inputs.pull-request-branch }}
+        labels: ${{ inputs.pull-request-labels }}
+        reviewers: ${{ inputs.pull-request-reviewers }}
+        team-reviewers: ${{ inputs.pull-request-team-reviewers }}
+branding:
+  icon: 'check'
+  color: 'blue'
