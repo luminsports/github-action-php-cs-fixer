@@ -105,7 +105,7 @@ runs:
       with:
         commit-message: ${{ inputs.commit-message }}
         title: ${{ inputs.pull-request-title }}
-        delete-branch: true }}
+        delete-branch: true
         assignees: ${{ inputs.pull-request-assignees }}
         branch: ${{ inputs.pull-request-branch }}
         labels: ${{ inputs.pull-request-labels }}
