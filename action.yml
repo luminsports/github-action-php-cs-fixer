@@ -31,17 +31,26 @@ inputs:
   pull-request-title:
     description: 'The title of the pull request.'
     required: false
-    default: 'Fix PHP code-style in ${{ github.ref }}'
+    default: 'Apply fixes from PHP CS Fixer (${{ github.ref_name }})'
   pull-request-assignees:
     description: 'A comma or newline separated list of assignees (GitHub usernames).'
     required: false
     default: ${{ github.actor }}
+  pull-request-body:
+    description: 'The title of the pull request.'
+    required: false
+    default: |
+      This pull request applies code style fixes from an analysis carried out by [PHP CS Fixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer).
+
+      ---
+
+      For more information, click [here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
   pull-request-reviewers:
     description: 'A comma or newline separated list of reviewers (GitHub usernames) to request a review from.'
     required: false
     default: ''
   pull-request-team-reviewers:
-    description: >
+    description: |
       A comma or newline separated list of GitHub teams to request a review from.
       Note that a `repo` scoped Personal Access Token (PAT) may be required.
     required: false
@@ -49,7 +58,7 @@ inputs:
   pull-request-branch:
     description: 'The pull request branch name.'
     required: false
-    default: 'php-cs-fixer/${{ github.ref }}'
+    default: 'php-cs-fixer/${{ github.ref_name }}'
   pull-request-labels:
     description: 'A comma or newline separated list of labels.'
     required: false
@@ -92,13 +101,14 @@ runs:
       shell: bash
       run: |
         curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/${{ inputs.rules-version }}/rules.php -o .php-cs-fixer.dist.php
-        ls -lah
-        chmod 640 .php-cs-fixer.dist.php
+        chmod 644 .php-cs-fixer.dist.php
 
     - name: Run PHP CS Fixer
       id: php-cs-fixer
       shell: bash
-      run: echo "::set-output name=checkstyle-result::$(./php-cs-fixer fix . --format=checkstyle)"
+      run: |
+        ./php-cs-fixer fix . --format=checkstyle > ./checkstyle-result.xml
+        echo "::set-output name=checkstyle-result::$(cat ./checkstyle-result.xml)"
 
     - name: Annotate
       if: inputs.create-annotations == 'true'
@@ -125,6 +135,8 @@ runs:
         labels: ${{ inputs.pull-request-labels }}
         reviewers: ${{ inputs.pull-request-reviewers }}
         team-reviewers: ${{ inputs.pull-request-team-reviewers }}
+        body: ${{ inputs.pull-request-body }}
+
 branding:
   icon: 'check'
   color: 'blue'
