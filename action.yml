@@ -90,14 +90,15 @@ runs:
     - name: Download PHP CS Fixer rules
       if: inputs.use-built-in-rules == 'true'
       shell: bash
-      run: curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/${{ inputs.rules-version }}/rules.php -o .php-cs-fixer.dist.php
+      run: |
+        curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/${{ inputs.rules-version }}/rules.php -o .php-cs-fixer.dist.php
+        ls -lah
+        chmod 640 .php-cs-fixer.dist.php
 
     - name: Run PHP CS Fixer
       id: php-cs-fixer
       shell: bash
-      run: |
-        ./php-cs-fixer fix --format=checkstyle > ./checkstyle-result.xml
-        echo "::set-output name=checkstyle-result::$(cat ./checkstyle-result.xml)"
+      run: echo "::set-output name=checkstyle-result::$(./php-cs-fixer fix . --format=checkstyle)"
 
     - name: Annotate
       if: inputs.create-annotations == 'true'
