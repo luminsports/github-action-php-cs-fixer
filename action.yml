@@ -70,7 +70,7 @@ inputs:
   rules-version:
     description: 'Version of rules to use from luminsports/php-cs-fixer-rules repo.'
     required: false
-    default: '1.0.0'
+    default: 'latest'
 outputs:
   checkstyle-result:
     description: 'Checkstyle report generate by php-cs-fixer'
@@ -93,15 +93,18 @@ runs:
     - name: Setup
       shell: bash
       run: |
-        curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/${{ inputs.php-cs-fixer-version }}/php-cs-fixer.phar -o php-cs-fixer
+        curl --fail -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/${{ inputs.php-cs-fixer-version }}/php-cs-fixer.phar -o php-cs-fixer
         chmod a+x php-cs-fixer
 
     - name: Download PHP CS Fixer rules
-      if: inputs.use-built-in-rules == 'true'
+      if: inputs.use-built-in-rules == 'true' && inputs.rules-version != 'latest'
       shell: bash
-      run: |
-        curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/${{ inputs.rules-version }}/rules.php -o .php-cs-fixer.dist.php
-        chmod 644 .php-cs-fixer.dist.php
+      run: curl --fail -L https://github.com/luminsports/php-cs-fixer-rules/releases/download/${{ inputs.rules-version }}/rules.php -o .php-cs-fixer.dist.php
+
+    - name: Download Latest PHP CS Fixer rules
+      if: inputs.use-built-in-rules == 'true' && inputs.rules-version == 'latest'
+      shell: bash
+      run: curl --fail -L https://github.com/luminsports/php-cs-fixer-rules/releases/latest/download/rules.php -o .php-cs-fixer.dist.php
 
     - name: Run PHP CS Fixer
       id: php-cs-fixer
