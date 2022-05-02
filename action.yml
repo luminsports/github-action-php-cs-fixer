@@ -110,7 +110,7 @@ runs:
       id: php-cs-fixer
       shell: bash
       run: |
-        ./php-cs-fixer fix . --format=checkstyle > ./checkstyle-result.xml
+        ./php-cs-fixer fix --format=checkstyle > ./checkstyle-result.xml
         echo "::set-output name=checkstyle-result::$(cat ./checkstyle-result.xml)"
 
     - name: Annotate
