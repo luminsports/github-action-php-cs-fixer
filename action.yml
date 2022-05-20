@@ -125,6 +125,13 @@ runs:
       shell: bash
       run: rm -rf ./php-cs-fixer ./checkstyle-result.xml ./.php-cs-fixer.cache
 
+    - name: Setup Git User
+      if: inputs.create-pull-request == 'true'
+      shell: bash
+      run: |
+        git config user.name 'github-actions[bot]'
+        git config user.email 'github-actions[bot]@users.noreply.github.com'
+
     - name: Create Pull Request
       id: pull-request
       if: inputs.create-pull-request == 'true'
