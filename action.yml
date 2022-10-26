@@ -117,11 +117,10 @@ runs:
 
     - name: Annotate
       if: inputs.create-annotations == 'true'
-      uses: jwgmeligmeyling/checkstyle-github-action@master
+      uses: Juuxel/publish-checkstyle-report@v1
       with:
-        name: ${{ inputs.annotation-name }}
-        title: ${{ inputs.annotation-title }}
-        path: './checkstyle-result.xml'
+        reports: |
+          ./checkstyle-result.xml
 
     - name: Cleanup
       shell: bash
@@ -137,7 +136,7 @@ runs:
     - name: Create Pull Request
       id: pull-request
       if: inputs.create-pull-request == 'true'
-      uses: peter-evans/create-pull-request@v3
+      uses: peter-evans/create-pull-request@v4
       with:
         commit-message: ${{ inputs.commit-message }}
         title: ${{ inputs.pull-request-title }}
