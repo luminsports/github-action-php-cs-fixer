@@ -111,7 +111,9 @@ runs:
       shell: bash
       run: |
         ./php-cs-fixer fix --format=checkstyle > ./checkstyle-result.xml
-        echo "checkstyle-result=$(cat ./checkstyle-result.xml)" >> $GITHUB_OUTPUT
+        echo 'checkstyle-result<<EOF' >> $GITHUB_OUTPUT
+        cat ./checkstyle-result.xml >> $GITHUB_OUTPUT
+        echo 'EOF' >> $GITHUB_OUTPUT
 
     - name: Annotate
       if: inputs.create-annotations == 'true'
