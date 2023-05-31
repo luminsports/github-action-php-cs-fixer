@@ -7,7 +7,7 @@ inputs:
   php-cs-fixer-version:
     description: 'Which php-cs-fixer release to download.'
     required: false
-    default: 'v3.7.0'
+    default: 'v3.17.0'
   create-annotations:
     description: 'Whether to create annotations based on checkstyle results.'
     required: false
