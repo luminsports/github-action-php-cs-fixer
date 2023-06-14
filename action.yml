@@ -109,8 +109,16 @@ runs:
     - name: Run PHP CS Fixer
       id: php-cs-fixer
       shell: bash
+      env:
+        START_COMMIT: ${{ github.event_name == "pull_request" && github.event.pull_request.base.sha || github.event.before }}
+        END_COMMIT: ${{ github.event_name == "pull_request" && github.event.pull_request.head.sha || github.event.after }}
+        COMMIT_RANGE: ${{ env.START_COMMIT }}..${{ env.END_COMMIT }}
       run: |
-        ./php-cs-fixer fix --format=checkstyle > ./checkstyle-result.xml
+        IFS='
+        '
+        CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB "${COMMIT_RANGE}")
+        if ! echo "${CHANGED_FILES}" | grep -qE "^(\\.php-cs-fixer(\\.dist)?\\.php|composer\\.lock)$"; then EXTRA_ARGS=$(printf -- '--path-mode=intersection\n--\n%s' "${CHANGED_FILES}"); else EXTRA_ARGS=''; fi
+        ./php-cs-fixer fix --format=checkstyle ${EXTRA_ARGS} > ./checkstyle-result.xml
         echo 'checkstyle-result<<EOF' >> $GITHUB_OUTPUT
         cat ./checkstyle-result.xml >> $GITHUB_OUTPUT
         echo 'EOF' >> $GITHUB_OUTPUT
