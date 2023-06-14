@@ -110,19 +110,20 @@ runs:
       shell: bash
       run: curl --fail -L https://github.com/luminsports/php-cs-fixer-rules/releases/latest/download/rules.php -o .php-cs-fixer.dist.php
 
-    - name: Run PHP CS Fixer
+    - name: Get specific changed files
       if: inputs.only-check-modified-files == 'true'
+      id: changed-php-files
+      uses: tj-actions/changed-files@v36
+      with:
+        files: |
+          **.php
+
+    - name: Run PHP CS Fixer
+      if: steps.changed-php-files.outputs.any_changed == 'true'
       id: php-cs-fixer-only-modified
       shell: bash
-      env:
-        START_COMMIT: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-        END_COMMIT: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
       run: |
-        IFS='
-        '
-        CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB "${START_COMMIT}..${END_COMMIT}")
-        if ! echo "${CHANGED_FILES}" | grep -qE "^(\\.php-cs-fixer(\\.dist)?\\.php|composer\\.lock)$"; then EXTRA_ARGS=$(printf -- '--path-mode=intersection\n--\n%s' "${CHANGED_FILES}"); else EXTRA_ARGS=''; fi
-        ./php-cs-fixer fix --format=checkstyle ${EXTRA_ARGS} > ./checkstyle-result.xml
+        ./php-cs-fixer fix --format=checkstyle --path-mode=intersection -- "${{ steps.changed-php-files.outputs.all_changed_files }}" > ./checkstyle-result.xml
         echo 'checkstyle-result<<EOF' >> $GITHUB_OUTPUT
         cat ./checkstyle-result.xml >> $GITHUB_OUTPUT
         echo 'EOF' >> $GITHUB_OUTPUT
@@ -158,7 +159,7 @@ runs:
     - name: Create Pull Request
       id: pull-request
       if: inputs.create-pull-request == 'true'
-      uses: peter-evans/create-pull-request@v4
+      uses: peter-evans/create-pull-request@v5
       with:
         commit-message: ${{ inputs.commit-message }}
         title: ${{ inputs.pull-request-title }}
