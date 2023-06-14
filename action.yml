@@ -111,7 +111,7 @@ runs:
       run: curl --fail -L https://github.com/luminsports/php-cs-fixer-rules/releases/latest/download/rules.php -o .php-cs-fixer.dist.php
 
     - name: Run PHP CS Fixer
-      if: only-check-modified-files == 'true'
+      if: inputs.only-check-modified-files == 'true'
       id: php-cs-fixer-only-modified
       shell: bash
       env:
@@ -129,7 +129,7 @@ runs:
         echo 'EOF' >> $GITHUB_OUTPUT
 
     - name: Run PHP CS Fixer
-      if: only-check-modified-files != 'true'
+      if: inputs.only-check-modified-files != 'true'
       id: php-cs-fixer
       shell: bash
       run: |
