@@ -112,7 +112,7 @@ runs:
 
     - name: Run PHP CS Fixer
       if: only-check-modified-files == 'true'
-      id: php-cs-fixer
+      id: php-cs-fixer-only-modified
       shell: bash
       env:
         START_COMMIT: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
