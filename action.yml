@@ -70,7 +70,7 @@ inputs:
   only-check-modified-files:
     description: 'Whether to limit checks to files that have been modified in the current push/PR.'
     required: false
-    default: 'true'
+    default: 'false'
   rules-version:
     description: 'Version of rules to use from luminsports/php-cs-fixer-rules repo.'
     required: false
