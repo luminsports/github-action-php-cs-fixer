@@ -144,11 +144,12 @@ runs:
       run: |
         curl --fail -L https://github.com/staabm/annotate-pull-request-from-checkstyle/releases/latest/download/cs2pr -o cs2pr
         chmod a+x cs2pr
-        cs2pr ./checkstyle-result.xml
+        cs2pr ./checkstyle-result.xml || (exit "$(($? == 1 ? 0 : $?))")
 
     - name: Cleanup
+      if: always()
       shell: bash
-      run: rm -rf ./php-cs-fixer ./checkstyle-result.xml ./.php-cs-fixer.cache
+      run: rm -rf ./php-cs-fixer ./cs2pr ./checkstyle-result.xml ./.php-cs-fixer.cache
 
     - name: Setup Git User
       if: inputs.create-pull-request == 'true'
