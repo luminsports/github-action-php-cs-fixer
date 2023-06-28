@@ -144,15 +144,15 @@ runs:
       run: |
         curl --fail -L https://github.com/staabm/annotate-pull-request-from-checkstyle/releases/latest/download/cs2pr -o cs2pr
         chmod a+x cs2pr
-        cs2pr ./checkstyle-result.xml || (exit "$(($? == 1 ? 0 : $?))")
+        cs2pr ./checkstyle-result.xml
 
     - name: Cleanup
-      if: always()
+      if: failure()
       shell: bash
       run: rm -rf ./php-cs-fixer ./cs2pr ./checkstyle-result.xml ./.php-cs-fixer.cache
 
     - name: Setup Git User
-      if: inputs.create-pull-request == 'true'
+      if: inputs.create-pull-request == 'true' && failure()
       shell: bash
       run: |
         git config user.name 'github-actions[bot]'
@@ -160,7 +160,7 @@ runs:
 
     - name: Create Pull Request
       id: pull-request
-      if: inputs.create-pull-request == 'true'
+      if: inputs.create-pull-request == 'true' && failure()
       uses: peter-evans/create-pull-request@v5
       with:
         commit-message: ${{ inputs.commit-message }}
