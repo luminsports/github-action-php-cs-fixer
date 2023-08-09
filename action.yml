@@ -143,8 +143,8 @@ runs:
       shell: bash
       run: |
         curl --fail -L https://github.com/staabm/annotate-pull-request-from-checkstyle/releases/latest/download/cs2pr -o cs2pr
-        chmod a+x cs2pr
-        cs2pr ./checkstyle-result.xml
+        chmod a+x ./cs2pr
+        ./cs2pr ./checkstyle-result.xml
 
     - name: Cleanup
       if: failure()
