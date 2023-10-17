@@ -172,6 +172,7 @@ runs:
         reviewers: ${{ inputs.pull-request-reviewers }}
         team-reviewers: ${{ inputs.pull-request-team-reviewers }}
         body: ${{ inputs.pull-request-body }}
+        base: ${{ github.head_ref }}
 
 branding:
   icon: 'check'
