@@ -151,6 +151,12 @@ runs:
       shell: bash
       run: rm -rf ./php-cs-fixer ./cs2pr ./checkstyle-result.xml ./.php-cs-fixer.cache
 
+    - name: Cleanup
+      id: author
+      if: inputs.create-pull-request == 'true' && failure()
+      shell: bash
+      run: echo "author=$(git log -1 --pretty="%an <%ae>")" >> "$GITHUB_OUTPUT"
+
     - name: Create Pull Request
       id: pull-request
       if: inputs.create-pull-request == 'true' && failure()
@@ -160,6 +166,7 @@ runs:
         title: ${{ inputs.pull-request-title }}
         delete-branch: true
         assignees: ${{ inputs.pull-request-assignees }}
+        author: ${{ steps.author.outputs.author || format('{0} <{1}+{0}@users.noreply.github.com>', github.actor, github.actor_id) }}
         branch: ${{ inputs.pull-request-branch }}
         labels: ${{ inputs.pull-request-labels }}
         reviewers: ${{ inputs.pull-request-reviewers }}
